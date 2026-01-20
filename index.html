@@ -9,35 +9,25 @@
         body { margin: 0; font-family: sans-serif; background-color: #fafafa; } 
         #root { padding: 20px; }
         .loading { font-size: 18px; color: #666; text-align: center; margin-top: 50px; }
-        .error-box { color: red; background: #ffebee; padding: 20px; border: 1px solid red; margin: 20px; font-family: monospace; white-space: pre-wrap; }
+        .error-box { color: #721c24; background: #f8d7da; padding: 20px; border: 1px solid #f5c6cb; margin: 20px; border-radius: 5px; font-family: sans-serif; }
     </style>
 
-    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
-    
-    <script src="https://unpkg.com/recharts@2.1.9/umd/Recharts.min.js"></script>
-    
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/recharts@2.1.12/umd/Recharts.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
 
     <div id="root">
-        <div class="loading">⏳ Спроба завантаження графіку...<br>Якщо цей напис не зникає довше 10 секунд — сталася помилка.</div>
+        <div class="loading">⏳ Завантаження графіку...<br>Використовуємо резервний канал зв'язку.</div>
     </div>
-
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            document.getElementById('root').innerHTML = 
-                '<div class="error-box"><b>⚠️ Сталася помилка:</b><br>' + message + 
-                '<br><br>Спробуйте оновити сторінку (Ctrl+F5).</div>';
-        };
-    </script>
 
     <script type="text/babel">
         try {
-            // Перевірка, чи завантажився Recharts
+            // Перевірка
             if (!window.Recharts) {
-                throw new Error("Бібліотека Recharts не завантажилася. Можливо, блокувальник реклами або слабкий інтернет.");
+                throw new Error("Не вдалося завантажити Recharts навіть через резервний канал.");
             }
 
             const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, ReferenceArea } = window.Recharts;
@@ -195,7 +185,7 @@
             ReactDOM.render(<AreaDynamicsPlot />, document.getElementById('root'));
         
         } catch (err) {
-            document.getElementById('root').innerHTML = '<div class="error-box"><b>⚠️ Помилка у коді React:</b><br>' + err.message + '</div>';
+            document.getElementById('root').innerHTML = '<div class="error-box"><b>⚠️ Помилка:</b><br>' + err.message + '</div>';
         }
     </script>
 </body>
