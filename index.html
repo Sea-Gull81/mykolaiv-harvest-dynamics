@@ -4,28 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Динаміка посівних площ (Миколаївська область)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #fafafa; padding: 20px; }
+        body { margin: 0; font-family: 'Arial', sans-serif; background-color: #fafafa; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; font-size: 20px; font-weight: 600; }
+        h2 { margin-top: 0; font-size: 20px; font-weight: 600; color: #333; }
         .subtitle { font-size: 14px; color: #666; font-style: italic; margin-bottom: 24px; }
-        .chart-container { position: relative; height: 500px; width: 100%; }
+        #chart_div { width: 100%; height: 500px; }
         .observations { margin-top: 32px; padding: 16px; background: #f5f5f5; border-radius: 4px; border-left: 4px solid #1976d2; }
         .observations h3 { margin: 0 0 12px 0; font-size: 16px; }
-        .observations p { margin: 8px 0; font-size: 14px; lineHeight: 1.6; }
+        .observations p { margin: 8px 0; font-size: 14px; line-height: 1.6; }
         .source { margin-top: 24px; font-size: 12px; color: #666; font-style: italic; }
     </style>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Year');
+        data.addColumn('number', 'Grains & Legumes');
+        data.addColumn('number', 'Sunflower');
+        data.addColumn('number', 'Combined Total');
+        // Додаємо колонку для анотації (лінія війни)
+        data.addColumn({type: 'string', role: 'annotation'});
+        data.addColumn({type: 'string', role: 'annotationText'});
+
+        data.addRows([
+          ['1990', 763.7, 144.3, 908.0, null, null],
+          ['2000', 628.0, 235.1, 863.1, null, null],
+          ['2010', 876.8, 396.6, 1273.4, null, null],
+          ['2015', 948.2, 475.6, 1423.8, null, null],
+          ['2020', 880.7, 513.0, 1393.7, null, null],
+          ['2021', 950.5, 518.0, 1468.5, null, null],
+          ['2022', 705.2, 405.1, 1110.3, 'Feb 24', 'Invasion Start'],
+          ['2023', 617.9, 416.0, 1033.9, null, null],
+          ['2024', 634.9, 486.0, 1120.9, null, null],
+          ['2025', 713.5, 412.8, 1126.3, null, null]
+        ]);
+
+        var options = {
+          title: '',
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          colors: ['#388e3c', '#f57c00', '#1976d2'], // Зелений, Помаранчевий, Синій
+          lineWidth: 3,
+          pointSize: 7,
+          vAxis: { 
+            title: 'Harvested Area (×10³ ha)',
+            viewWindow: { min: 0, max: 1600 }
+          },
+          hAxis: { title: 'Year' },
+          chartArea: { width: '85%', height: '75%' },
+          annotations: {
+            style: 'line'
+          }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
 </head>
 <body>
-
     <div class="container">
         <h2>Figure 1. Dynamics of Harvested Area in Mykolaiv Oblast, 1990-2025</h2>
-        <p class="subtitle">Sharp decline in 2022 corresponds to full-scale Russian invasion. Gray shaded area indicates war period.</p>
+        <p class="subtitle">Sharp decline in 2022 corresponds to full-scale Russian invasion.</p>
         
-        <div class="chart-container">
-            <canvas id="myChart"></canvas>
-        </div>
+        <div id="chart_div"></div>
 
         <div class="observations">
             <h3>Key Observations:</h3>
@@ -37,116 +83,5 @@
 
         <p class="source">Source: State Statistics Service of Ukraine; Mykolaiv Oblast Economic and Social Development Program 2026.</p>
     </div>
-
-    <script>
-        const ctx = document.getElementById('myChart').getContext('2d');
-        
-        // Дані
-        const years = [1990, 2000, 2010, 2015, 2020, 2021, 2022, 2023, 2024, 2025];
-        const combined = [908.0, 863.1, 1273.4, 1423.8, 1393.7, 1468.5, 1110.3, 1033.9, 1120.9, 1126.3];
-        const grains = [763.7, 628.0, 876.8, 948.2, 880.7, 950.5, 705.2, 617.9, 634.9, 713.5];
-        const sunflower = [144.3, 235.1, 396.6, 475.6, 513.0, 518.0, 405.1, 416.0, 486.0, 412.8];
-
-        // Плагін для малювання "зони війни" (сірий фон)
-        const warZonePlugin = {
-            id: 'warZone',
-            beforeDraw: (chart) => {
-                const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
-                const startX = x.getPixelForValue(2022);
-                const endX = x.getPixelForValue(2025);
-                
-                ctx.save();
-                ctx.fillStyle = 'rgba(255, 235, 238, 0.5)'; // Світло-червоний фон
-                ctx.fillRect(startX, top, endX - startX, bottom - top);
-                
-                // Лінія вторгнення
-                ctx.beginPath();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#d32f2f';
-                ctx.setLineDash([5, 5]);
-                ctx.moveTo(startX, top);
-                ctx.lineTo(startX, bottom);
-                ctx.stroke();
-                
-                // Підпис
-                ctx.fillStyle = '#d32f2f';
-                ctx.font = 'bold 12px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Feb 24, 2022', startX, top + 20);
-                ctx.restore();
-            }
-        };
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: years,
-                datasets: [
-                    {
-                        label: 'Combined (Grains + Sunflower)',
-                        data: combined,
-                        borderColor: '#1976d2',
-                        backgroundColor: '#1976d2',
-                        borderWidth: 3,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Grains and Legumes',
-                        data: grains,
-                        borderColor: '#388e3c',
-                        backgroundColor: '#388e3c',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 4,
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Sunflower',
-                        data: sunflower,
-                        borderColor: '#f57c00',
-                        backgroundColor: '#f57c00',
-                        borderWidth: 2,
-                        borderDash: [3, 3],
-                        pointRadius: 4,
-                        tension: 0.1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { padding: 20, usePointStyle: true }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + ' × 10³ ha';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        title: { display: true, text: 'Harvested Area (×10³ ha)' },
-                        min: 0,
-                        max: 1600
-                    },
-                    x: {
-                        title: { display: true, text: 'Year' }
-                    }
-                }
-            },
-            plugins: [warZonePlugin]
-        });
-    </script>
 </body>
 </html>
