@@ -5,33 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Динаміка посівних площ (Миколаївська область)</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.12/Recharts.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <style> 
-        body { margin: 0; font-family: sans-serif; background-color: #fafafa; } 
-        #loading-msg { padding: 20px; font-size: 18px; color: #666; text-align: center; margin-top: 50px;}
-        #error-msg { display: none; padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; margin: 20px; border-radius: 5px;}
-    </style>
+    <style> body { margin: 0; font-family: sans-serif; background-color: #fafafa; } </style>
 </head>
 <body>
-    
     <div id="root">
-        <div id="loading-msg">⏳ Завантаження графіку...</div>
+        <div style="padding: 20px; text-align: center; color: #666;">⏳ Завантаження графіку...</div>
     </div>
-    
-    <div id="error-msg"></div>
 
     <script type="text/babel">
-        // Перевірка, чи завантажився Recharts
-        if (!window.Recharts) {
-            document.getElementById('loading-msg').style.display = 'none';
-            document.getElementById('error-msg').style.display = 'block';
-            document.getElementById('error-msg').innerHTML = "<b>Помилка:</b> Браузер блокує скрипти при локальному відкритті. <br><br><b>Рішення:</b> Завантажте цей файл на GitHub (як описано в інструкції раніше) — там він запрацює гарантовано.";
-        }
-
         const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, ReferenceArea } = Recharts;
 
         const AreaDynamicsPlot = () => {
@@ -186,7 +172,8 @@
             );
         };
 
-        ReactDOM.render(<AreaDynamicsPlot />, document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AreaDynamicsPlot />);
     </script>
 </body>
 </html>
