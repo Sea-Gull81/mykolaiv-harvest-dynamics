@@ -10,7 +10,7 @@
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; font-size: 20px; font-weight: 600; color: #333; }
         .subtitle { font-size: 14px; color: #666; font-style: italic; margin-bottom: 24px; }
-        #chart_div { width: 100%; height: 550px; } /* Трохи збільшив висоту */
+        #chart_div { width: 100%; height: 550px; }
         .observations { margin-top: 32px; padding: 16px; background: #f5f5f5; border-radius: 4px; border-left: 4px solid #1976d2; }
         .observations h3 { margin: 0 0 12px 0; font-size: 16px; }
         .observations p { margin: 8px 0; font-size: 14px; line-height: 1.6; }
@@ -22,49 +22,48 @@
 
       function drawChart() {
         var data = new google.visualization.DataTable();
-        // Колонка років
         data.addColumn('string', 'Year');
         
-        // Мирний період (суцільні лінії)
-        data.addColumn('number', 'Grains (Pre-war)');
-        data.addColumn('number', 'Sunflower (Pre-war)');
-        data.addColumn('number', 'Combined (Pre-war)');
+        // --- МИРНИЙ ЧАС (Суцільні лінії) ---
+        data.addColumn('number', 'Grains & Legumes');
+        data.addColumn('number', 'Sunflower');
+        data.addColumn('number', 'Combined Total');
         
-        // Воєнний період (пунктирні лінії)
-        data.addColumn('number', 'Grains (War period)');
-        data.addColumn('number', 'Sunflower (War period)');
-        data.addColumn('number', 'Combined (War period)');
+        // --- ВІЙНА (Пунктирні лінії) ---
+        // Ми їх додаємо як окремі серії, але приховаємо з легенди, щоб не дублювати написи
+        data.addColumn('number', '_Grains_War');
+        data.addColumn('number', '_Sunflower_War');
+        data.addColumn('number', '_Combined_War');
         
-        // Анотація для лінії вторгнення
+        // Анотації
         data.addColumn({type: 'string', role: 'annotation'});
         data.addColumn({type: 'string', role: 'annotationText'});
 
         data.addRows([
-          // РІК,  Зерно(Мир), Сон(Мир), Заг(Мир),  Зерно(Війна), Сон(Війна), Заг(Війна),  Помітка, Текст
-          ['1990', 763.7,      144.3,    908.0,     null,         null,       null,        null,    null],
-          ['2000', 628.0,      235.1,    863.1,     null,         null,       null,        null,    null],
-          ['2010', 876.8,      396.6,    1273.4,    null,         null,       null,        null,    null],
-          ['2015', 948.2,      475.6,    1423.8,    null,         null,       null,        null,    null],
-          ['2020', 880.7,      513.0,    1393.7,    null,         null,       null,        null,    null],
+          // Рік    Зерно   Сон.    Заг.    Зер(В)  Сон(В)  Заг(В)   Анотація
+          ['1990',  763.7,  144.3,  908.0,  null,   null,   null,    null, null],
+          ['2000',  628.0,  235.1,  863.1,  null,   null,   null,    null, null],
+          ['2010',  876.8,  396.6,  1273.4, null,   null,   null,    null, null],
+          ['2015',  948.2,  475.6,  1423.8, null,   null,   null,    null, null],
+          ['2020',  880.7,  513.0,  1393.7, null,   null,   null,    null, null],
           
-          // 2021 - Пік. Це точка, де сходяться мир і війна (для безперервності лінії)
-          ['2021', 950.5,      518.0,    1468.5,    950.5,        518.0,      1468.5,      null,    null],
+          // 2021: Точка з'єднання (дублюємо значення в обох групах, щоб лінія була неперервною)
+          ['2021',  950.5,  518.0,  1468.5, 950.5,  518.0,  1468.5,  null, null],
           
-          // 2022 - Початок війни (Мирні колонки = null)
-          ['2022', null,       null,     null,      705.2,        405.1,      1110.3,      'Feb 24', 'Invasion Start'],
-          ['2023', null,       null,     null,      617.9,        416.0,      1033.9,      null,    null],
-          ['2024', null,       null,     null,      634.9,        486.0,      1120.9,      null,    null],
-          ['2025', null,       null,     null,      713.5,        412.8,      1126.3,      null,    null]
+          // 2022-2025: Мирні колонки = null, Воєнні колонки = значення
+          ['2022',  null,   null,   null,   705.2,  405.1,  1110.3,  'Feb 24', 'Invasion Start'],
+          ['2023',  null,   null,   null,   617.9,  416.0,  1033.9,  null, null],
+          ['2024',  null,   null,   null,   634.9,  486.0,  1120.9,  null, null],
+          ['2025',  null,   null,   null,   713.5,  412.8,  1126.3,  null, null]
         ]);
 
         var options = {
-          title: '', // Заголовок прибрано
+          title: '',
           curveType: 'function',
           legend: { position: 'bottom' },
-          // Кольори: 
-          // 0,1,2 (Мир): Зелений, Помаранчевий, Синій
-          // 3,4,5 (Війна): Ті самі кольори, але вони будуть пунктирними завдяки series
-          colors: ['#388e3c', '#f57c00', '#1976d2', '#388e3c', '#f57c00', '#1976d2'], 
+          // Кольори (повторюємо двічі: для мирних і для воєнних ліній)
+          // Порядок: Зелений, Помаранчевий, Синій
+          colors: ['#388e3c', '#f57c00', '#1976d2', '#388e3c', '#f57c00', '#1976d2'],
           lineWidth: 3,
           pointSize: 7,
           vAxis: { 
@@ -74,14 +73,15 @@
           hAxis: { title: 'Year' },
           chartArea: { width: '85%', height: '70%' },
           
-          // Налаштування ліній
           series: {
-            0: { lineDashStyle: [0, 0] }, // Мир: Суцільна
+            // Мирні лінії (суцільні)
+            0: { lineDashStyle: [0, 0] },
             1: { lineDashStyle: [0, 0] },
             2: { lineDashStyle: [0, 0] },
-            3: { lineDashStyle: [4, 4], pointShape: 'diamond' }, // Війна: Пунктир + ромбики
-            4: { lineDashStyle: [4, 4], pointShape: 'diamond' },
-            5: { lineDashStyle: [4, 4], pointShape: 'diamond' }
+            // Воєнні лінії (пунктирні + приховані з легенди)
+            3: { lineDashStyle: [4, 4], visibleInLegend: false, pointShape: 'diamond' },
+            4: { lineDashStyle: [4, 4], visibleInLegend: false, pointShape: 'diamond' },
+            5: { lineDashStyle: [4, 4], visibleInLegend: false, pointShape: 'diamond' }
           },
           
           annotations: {
@@ -102,7 +102,7 @@
 <body>
     <div class="container">
         <h2>Dynamics of Harvested Area in Mykolaiv Oblast, 1990-2025</h2>
-        <p class="subtitle">Dashed lines indicate the war period. Red marker denotes the full-scale invasion.</p>
+        <p class="subtitle">Solid lines represent pre-war period. Dashed lines indicate the war period (post-2021).</p>
         
         <div id="chart_div"></div>
 
