@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Динаміка посівних площ (Миколаївська область)</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.12/Recharts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    
+    <style> 
+        body { margin: 0; font-family: sans-serif; background-color: #fafafa; } 
+        #loading-msg { padding: 20px; font-size: 18px; color: #666; text-align: center; margin-top: 50px;}
+        #error-msg { display: none; padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; margin: 20px; border-radius: 5px;}
+    </style>
+</head>
+<body>
+    
+    <div id="root">
+        <div id="loading-msg">⏳ Завантаження графіку...</div>
+    </div>
+    
+    <div id="error-msg"></div>
+
+    <script type="text/babel">
+        // Перевірка, чи завантажився Recharts
+        if (!window.Recharts) {
+            document.getElementById('loading-msg').style.display = 'none';
+            document.getElementById('error-msg').style.display = 'block';
+            document.getElementById('error-msg').innerHTML = "<b>Помилка:</b> Браузер блокує скрипти при локальному відкритті. <br><br><b>Рішення:</b> Завантажте цей файл на GitHub (як описано в інструкції раніше) — там він запрацює гарантовано.";
+        }
+
+        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, ReferenceArea } = Recharts;
+
+        const AreaDynamicsPlot = () => {
+            const data = [
+                { year: 1990, grains: 763.7, sunflower: 144.3, combined: 908.0 },
+                { year: 2000, grains: 628.0, sunflower: 235.1, combined: 863.1 },
+                { year: 2010, grains: 876.8, sunflower: 396.6, combined: 1273.4 },
+                { year: 2015, grains: 948.2, sunflower: 475.6, combined: 1423.8 },
+                { year: 2020, grains: 880.7, sunflower: 513.0, combined: 1393.7 },
+                { year: 2021, grains: 950.5, sunflower: 518.0, combined: 1468.5 },
+                { year: 2022, grains: 705.2, sunflower: 405.1, combined: 1110.3 },
+                { year: 2023, grains: 617.9, sunflower: 416.0, combined: 1033.9 },
+                { year: 2024, grains: 634.9, sunflower: 486.0, combined: 1120.9 },
+                { year: 2025, grains: 713.5, sunflower: 412.8, combined: 1126.3 }
+            ];
+
+            const CustomTooltip = ({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                    return (
+                        <div style={{
+                            backgroundColor: 'white',
+                            padding: '12px',
+                            border: '1px solid #ccc',
+                            borderRadius: '4px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}>
+                            <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>{label}</p>
+                            {payload.map((entry, index) => (
+                                <p key={index} style={{ margin: '4px 0', color: entry.color }}>
+                                    {entry.name}: {entry.value.toFixed(1)} × 10³ ha
+                                </p>
+                            ))}
+                        </div>
+                    );
+                }
+                return null;
+            };
+
+            return (
+                <div style={{ width: '100%', padding: '20px', minHeight: '100vh' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto', backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                        <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '20px', fontWeight: '600' }}>
+                            Figure 1. Dynamics of Harvested Area in Mykolaiv Oblast, 1990-2025
+                        </h2>
+                        <p style={{ marginTop: '0', marginBottom: '24px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                            Sharp decline in 2022 corresponds to full-scale Russian invasion. Gray shaded area indicates war period.
+                        </p>
+                        
+                        <div style={{ width: '100%', height: '500px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                    data={data}
+                                    margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                                    <ReferenceArea x1={2022} x2={2025} fill="#ffebee" fillOpacity={0.3} />
+                                    <ReferenceLine 
+                                        x={2022} 
+                                        stroke="#d32f2f" 
+                                        strokeWidth={2}
+                                        strokeDasharray="5 5"
+                                        label={{ 
+                                            value: 'Feb 24, 2022', 
+                                            position: 'top',
+                                            fill: '#d32f2f',
+                                            fontSize: 12,
+                                            fontWeight: 'bold'
+                                        }}
+                                    />
+                                    <XAxis 
+                                        dataKey="year" 
+                                        tick={{ fontSize: 12 }}
+                                        label={{ 
+                                            value: 'Year', 
+                                            position: 'insideBottom', 
+                                            offset: -10,
+                                            style: { fontSize: 14, fontWeight: '500' }
+                                        }}
+                                    />
+                                    <YAxis 
+                                        tick={{ fontSize: 12 }}
+                                        label={{ 
+                                            value: 'Harvested Area (×10³ ha)', 
+                                            angle: -90, 
+                                            position: 'insideLeft',
+                                            style: { fontSize: 14, fontWeight: '500' }
+                                        }}
+                                        domain={[0, 1600]}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend 
+                                        verticalAlign="bottom" 
+                                        height={50}
+                                        wrapperStyle={{ paddingTop: '20px', fontSize: '13px' }}
+                                    />
+                                    <Line 
+                                        type="monotone" 
+                                        dataKey="combined" 
+                                        stroke="#1976d2" 
+                                        strokeWidth={3}
+                                        name="Combined (Grains + Sunflower)"
+                                        dot={{ r: 5, fill: '#1976d2' }}
+                                        activeDot={{ r: 7 }}
+                                    />
+                                    <Line 
+                                        type="monotone" 
+                                        dataKey="grains" 
+                                        stroke="#388e3c" 
+                                        strokeWidth={2.5}
+                                        name="Grains and Legumes"
+                                        dot={{ r: 4, fill: '#388e3c' }}
+                                        strokeDasharray="5 5"
+                                    />
+                                    <Line 
+                                        type="monotone" 
+                                        dataKey="sunflower" 
+                                        stroke="#f57c00" 
+                                        strokeWidth={2.5}
+                                        name="Sunflower"
+                                        dot={{ r: 4, fill: '#f57c00' }}
+                                        strokeDasharray="3 3"
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        <div style={{ marginTop: '32px', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px', borderLeft: '4px solid #1976d2' }}>
+                            <h3 style={{ marginTop: 0, marginBottom: '12px', fontSize: '16px', fontWeight: '600' }}>
+                                Key Observations:
+                            </h3>
+                            <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#333' }}>
+                                <p style={{ margin: '8px 0' }}>
+                                    <strong>Pre-war peak (2021):</strong> Combined harvested area reached 1,468.5 × 10³ ha, representing the culmination of post-Soviet agricultural recovery.
+                                </p>
+                                <p style={{ margin: '8px 0' }}>
+                                    <strong>2022 invasion impact:</strong> Immediate 24.4% contraction (−358.2 × 10³ ha) following February 24 invasion, with grains declining 26.2% and sunflower 21.8%.
+                                </p>
+                                <p style={{ margin: '8px 0' }}>
+                                    <strong>2022-2025 stagnation:</strong> Despite three years post-invasion, harvested area remains plateaued at ~1,126 × 10³ ha (76.7% of 2021 baseline), indicating systematic barriers to land reintegration rather than temporary displacement.
+                                </p>
+                                <p style={{ margin: '8px 0' }}>
+                                    <strong>Persistent land withdrawal:</strong> 342.2 × 10³ ha (23.3%) remains excluded from cultivation in 2025, closely aligning with national reduction trends (22.8%), establishing Mykolaiv Oblast as representative indicator of war-induced agricultural disruption in southern Ukraine.
+                                </p>
+                            </div>
+                        </div>
+
+                        <p style={{ marginTop: '24px', fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
+                            Source: State Statistics Service of Ukraine; Mykolaiv Oblast Economic and Social Development Program 2026.
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<AreaDynamicsPlot />, document.getElementById('root'));
+    </script>
+</body>
+</html>
